@@ -27,14 +27,18 @@
       Frezon: danger
       # DS14-start
       InfectionDeadSpace: stationInfectionDeadSpace
-      Nitryl: stationNitryl
-      NitricOxide: stationNitricOxide
       Iprit: stationIprit
       Brizidium: stationBrizidium
       Hydrogen: stationHydrogen
       Fixirium: stationFixirium
       Nitriatium: stationNitriatium
       Hilium: stationHilium
+      HyperNoblium: stationHyperNoblium
+      ProtoNitrate: stationProtoNitrate
+      Helium: stationHelium
+      Halon: stationHalon
+      Zauker: stationZauker
+      Antinoblium: stationAntinoblium
       # DS14-end
   - type: Tag
     tags:

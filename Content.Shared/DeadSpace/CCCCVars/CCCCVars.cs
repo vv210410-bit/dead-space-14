@@ -124,6 +124,9 @@ public sealed class CCCCVars
     public static readonly CVarDef<bool> LavalandAutoGenerate =
         CVarDef.Create("lavaland.auto_generate", true, CVar.SERVERONLY);
 
+    public static readonly CVarDef<bool> AshWalkersEnabled =
+        CVarDef.Create("lavaland.ash_walkers_enabled", true, CVar.SERVER | CVar.REPLICATED);
+
     /*
     * Prison
     */
@@ -158,6 +161,16 @@ public sealed class CCCCVars
     /// </summary>
     public static readonly CVarDef<string> Background =
         CVarDef.Create("ui.background", "Image", CVar.CLIENTONLY | CVar.ARCHIVE);
+
+    public const string InterfaceStyleDark = "Dark";
+    public const string InterfaceStyleLight = "Light";
+    public const string InterfaceStyleClassic = "Classic";
+
+    /// <summary>
+    /// Visual style used by ordinary game windows and menus. This is separate from the HUD resource theme.
+    /// </summary>
+    public static readonly CVarDef<string> InterfaceStyle =
+        CVarDef.Create("ui.style_theme", InterfaceStyleDark, CVar.CLIENTONLY | CVar.ARCHIVE);
 
     /*
     * Player Count Mode

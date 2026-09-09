@@ -5,7 +5,6 @@ using Content.Server.Atmos.EntitySystems;
 using Content.Shared.Atmos;
 using Content.Shared.Atmos.Reactions;
 using JetBrains.Annotations;
-using Robust.Shared.Map;
 
 namespace Content.Server.DeadSpace.Atmos.Reactions;
 
@@ -20,13 +19,13 @@ public sealed partial class HydrogenFireReaction : IGasReactionEffect
     public float ExplosionThresholdMoles = 1f;
 
     [DataField]
-    public float ExplosionIntensityPerMole = 0.25f;
+    public float ExplosionIntensityPerMole = 0.75f;
 
     [DataField]
-    public float MaxExplosionIntensity = 25f;
+    public float MaxExplosionIntensity = 75f;
 
     [DataField]
-    public float ExplosionSlope = 3f;
+    public float ExplosionSlope = 0.75f;
 
     [DataField]
     public float MaxTileIntensity = 6f;
@@ -68,23 +67,20 @@ public sealed partial class HydrogenFireReaction : IGasReactionEffect
             var mixTemperature = mixture.Temperature;
             if (mixTemperature > Atmospherics.FireMinimumTemperatureToExist)
                 atmosphereSystem.HotspotExpose(tile, mixTemperature, mixture.Volume);
-
-            if (hydrogenBurned >= ExplosionThresholdMoles)
-            {
-                var coords = atmosphereSystem.GetTileWorldCoordinates(tile);
-                if (coords.MapId != MapId.Nullspace)
-                {
-                    var intensity = MathF.Min(hydrogenBurned * ExplosionIntensityPerMole, MaxExplosionIntensity);
-                    atmosphereSystem.Explosion.QueueExplosion(
-                        coords,
-                        ExplosionPrototype,
-                        intensity,
-                        ExplosionSlope,
-                        MaxTileIntensity,
-                        cause: null,
-                        addLog: false);
-                }
-            }
+        }
+        
+        if (hydrogenBurned >= ExplosionThresholdMoles &&
+            atmosphereSystem.TryGetGasReactionCoordinates(holder, out var coords))
+        {
+            var intensity = MathF.Min(hydrogenBurned * ExplosionIntensityPerMole, MaxExplosionIntensity);
+            atmosphereSystem.Explosion.QueueExplosion(
+                coords,
+                ExplosionPrototype,
+                intensity,
+                ExplosionSlope,
+                MaxTileIntensity,
+                cause: null,
+                addLog: false);
         }
 
         return ReactionResult.Reacting;

@@ -66,6 +66,7 @@
         BaseUnshaded: alive-unshaded
       Critical:
         Base: crit
+        BaseUnshaded: crit-unshaded
       Dead:
         Base: dead
         BaseUnshaded: dead-unshaded
@@ -202,7 +203,7 @@
       collection: MantisRush
   - type: AntiRottingContainer
   - type: NecromorfAfterInfection
-    necroPrototype: NecroBrute
+    necroPrototype: NecroDragon # DS14
   - type: GhostRoleNotifys 
     groupPrototype: Dragonping
   - type: Destructible
@@ -249,6 +250,10 @@
   parent: BaseMobDragon
   id: MobDragon
   components:
+  # DS14-start
+  - type: Stamina
+    baseCritThreshold: 200
+  # DS14-end
   - type: Dragon
     spawnRiftAction: ActionSpawnRift
   - type: GhostRole
