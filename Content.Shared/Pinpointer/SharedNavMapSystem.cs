@@ -2,6 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using Content.Shared.Examine;
+using Content.Shared.StepTrigger.Components;
 using Content.Shared.Tag;
 using Content.Shared.Wall;
 using Robust.Shared.GameStates;
@@ -13,7 +14,7 @@ namespace Content.Shared.Pinpointer;
 
 public abstract class SharedNavMapSystem : EntitySystem
 {
-    public const int Categories = 3;
+    public const int Categories = 4;
     public const int Directions = 4; // Not directly tied to number of atmos directions
 
     public const int ChunkSize = 8;
@@ -24,13 +25,16 @@ public abstract class SharedNavMapSystem : EntitySystem
     public const int WallMask = AllDirMask << (int) NavMapChunkType.Wall;
     public const int FloorMask = AllDirMask << (int) NavMapChunkType.Floor;
 
+    public const int LavaMask = AllDirMask << (int) NavMapChunkType.Lava;
+
     [Robust.Shared.IoC.Dependency] private readonly TagSystem _tagSystem = default!;
     [Robust.Shared.IoC.Dependency] private readonly INetManager _net = default!;
 
     private static readonly ProtoId<TagPrototype>[] WallTags = {"Window"};
+
+    private static readonly ProtoId<TagPrototype>[] LavaTag = {"Lava"};
     private EntityQuery<NavMapDoorComponent> _doorQuery;
     private EntityQuery<WallComponent> _wallQuery; // DS14: injected EntityQuery fields are unavailable on the current engine baseline.
-
     public override void Initialize()
     {
         base.Initialize();
@@ -67,6 +71,9 @@ public abstract class SharedNavMapSystem : EntitySystem
 
         if (_wallQuery.HasComp(uid) || _tagSystem.HasAnyTag(uid, WallTags))
             return NavMapChunkType.Wall;
+
+        if (_tagSystem.HasAnyTag(uid, LavaTag))
+            return NavMapChunkType.Lava;
 
         return NavMapChunkType.Invalid;
     }

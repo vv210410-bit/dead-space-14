@@ -131,6 +131,9 @@ public sealed partial class NavMapSystem
                 if ((AirlockMask & flag) == AirlockMask)
                     continue;
 
+                if ((LavaMask & flag) == LavaMask)
+                    continue;
+
                 // Otherwise the tile can be added to this region
                 visitedTiles.Add(current);
                 visitedChunks.Add(chunkOrigin);

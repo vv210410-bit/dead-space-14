@@ -122,5 +122,7 @@ public enum NavMapChunkType : byte
     Floor = 0, // I believe floors have directional information for diagonal tiles?
     Wall = SharedNavMapSystem.Directions,
     Airlock = 2 * SharedNavMapSystem.Directions,
+
+    Lava = 3 * SharedNavMapSystem.Directions,
 }
 

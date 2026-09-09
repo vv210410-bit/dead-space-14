@@ -203,6 +203,9 @@
   id: FoodMeatSmallBall
 
 - type: Tag
+  id: Lava
+
+- type: Tag
   id: GasTank
 
 - type: Tag

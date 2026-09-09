@@ -58,4 +58,4 @@ rules_file = "DeadSpaceDefaultRuleset"
 enabled = false
 
 [lavaland]
-auto_generate = false
+auto_generate = true
