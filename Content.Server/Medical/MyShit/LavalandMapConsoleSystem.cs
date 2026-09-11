@@ -81,9 +81,6 @@ public sealed class LavalandMapConsoleSystem : EntitySystem
     private const float UpdateRate = 3f;
     private float _updateDiff;
 
-    public bool a = true;
-
-    public List<(EntityUid, PhysicsComponent)> Entities = new();
     public override void Initialize()
     {
         base.Initialize();
@@ -102,45 +99,22 @@ public sealed class LavalandMapConsoleSystem : EntitySystem
 
         var maps = EntityQueryEnumerator<LavalandMapConsoleComponent>();
 
-        while (Entities.Count != 0)
-        {
-            _physics.SetBodyType(Entities.First().Item1, BodyType.Static);
-            Dirty(Entities.First().Item1, Entities.First().Item2);
-            Entities.RemoveAt(0);
-        }
         while (maps.MoveNext(out var uid, out var map))
         {
-            if (map.OldNavMaps.Count == 0)
-            {
-                var lookup = Get<EntityLookupSystem>();
-
-                // Получаем координаты от сущности с компонентом Transform
-                var transform = Transform(uid);
-                var position = transform.Coordinates;
-
-                // Ищем все сущности в радиусе 10 тайлов
-                var entitiesInRange = lookup.GetEntitiesInRange(position, 500);
-
-                // Фильтруем только стены
-                foreach (var entity in entitiesInRange)
-                {
-                    if (HasComp<WallComponent>(entity))
-                    {
-                        EnsureComp<PhysicsComponent>(entity, out var physics);
-                        _physics.SetBodyType(entity, BodyType.Dynamic);
-                        Dirty(entity, physics);
-                        Entities.Add((entity,physics));
-                    }
-                }
-            }
-
             if (!_cell.HasActivatableCharge(uid))
                 return;
 
-            var navMaps = Get(uid);
             var xform = Transform(uid);
-            var mappos = _transformSystem.ToMapCoordinates(xform.Coordinates).Position;
+            var mapPos = _transformSystem.ToMapCoordinates(xform.Coordinates).Position;
 
+            if (xform.MapUid == null)
+                return;
+
+            List<Entity<MapGridComponent>> grids = new();
+            _mapManager.FindGridsIntersecting(xform.MapID, new Box2(new Vector2i(0, 0) - 500, new Vector2i(0, 0) + 500), ref grids, approx: true, includeMap: true);
+            var navMaps = Get(grids);
+
+            //Добавляем грид в посещенные
             if (xform.GridUid != null && !map.VisitedGrids.ContainsKey(xform.GridUid.Value.Id))
             {
                 TryComp(xform.GridUid, out MapGridComponent? grid);
@@ -151,63 +125,94 @@ public sealed class LavalandMapConsoleSystem : EntitySystem
                         map.VisitedGrids.Add(xform.GridUid.Value.Id, res.Value);
                 }
             }
+
+            //Записываем информацию о ближайших чанках в компонент. 
             foreach (var (navmap, pogr, gridId) in navMaps)
             {
-                foreach (var (chunkOrigin, chunk) in navmap.Chunks)
-                {
-                    var chunkcenter = new Vector2(chunkOrigin.X * 8 + pogr.X + 4, chunkOrigin.Y * 8 + pogr.Y + 4);
-                    if ((Math.Abs(mappos.X - (chunkcenter.X + 4)) <= 16 || Math.Abs(mappos.X - (chunkcenter.X - 4)) <= 16) &&
-                    (Math.Abs(mappos.Y - (chunkcenter.Y + 4)) <= 16 || Math.Abs(mappos.Y - (chunkcenter.Y - 4)) <= 16))
-                    {
-                        if (!map.OldNavMaps.ContainsKey(gridId))
-                        {
-                            map.OldNavMaps.Add(gridId, new OldNavMap());
-                        }
+                //переводем позицию игрока в чанк.
+                var posToChunk = new Vector2i((int)Math.Floor((mapPos.X + pogr.X) / 8), (int)Math.Floor((mapPos.Y + pogr.Y) / 8));
+                posToChunk = new Vector2i(0,0);
 
-                        map.OldNavMaps[gridId].AddChunk(chunk);
-                        map.OldNavMaps[gridId].pogr = pogr;
-                    }
+                if (!map.OldNavMaps.ContainsKey(gridId))
+                {
+                    map.OldNavMaps.Add(gridId, new OldNavMap());
+                }
+                map.OldNavMaps[gridId].Pogr = pogr;
+
+                foreach (var chunk in navmap.Chunks)
+                {
+                    map.OldNavMaps[gridId].AddChunk(chunk.Value);
                 }
             }
+
+            // добавляем "пустые чанки,чтобы потом они тоже были помечены, как посещенные
             if (xform.MapUid != null && map.OldNavMaps.ContainsKey(xform.MapUid.Value.Id))
             {
-                var currentChunk = new Vector2i((int)Math.Floor(mappos.X / 8f),(int)Math.Floor(mappos.Y / 8f));
-                for (int y = -1; y < 2; y++)
+                var posToChunk = new Vector2i((int)Math.Floor(mapPos.X / 8f), (int)Math.Floor(mapPos.Y / 8f));
+                for (int y = -1; y <= 1; y++)
                 {
-                    for (int x = -1; x < 2; x++)
+                    for (int x = -1; x <= 1; x++)
                     {
-                        if (!map.OldNavMaps[xform.MapUid.Value.Id].Chunks.ContainsKey(new Vector2i(currentChunk.X + x, currentChunk.Y + y)))
+                        if (!map.OldNavMaps[xform.MapUid.Value.Id].Chunks.ContainsKey(new Vector2i(posToChunk.X + x, posToChunk.Y + y)))
                         {
-                            var nullChunk = new NavMapChunk(new Vector2i(currentChunk.X + x, currentChunk.Y + y));
+                            var nullChunk = new NavMapChunk(new Vector2i(posToChunk.X + x, posToChunk.Y + y));
                             map.OldNavMaps[xform.MapUid.Value.Id].AddChunk(nullChunk);
                         }
                     }
                 }
             }
+
+            var gridsId = grids.Select(p => p.Owner.Id);
+
+            //Если грид исчез, то убираем его из списка. Например: Шатл
+            var keys = map.VisitedGrids.Keys.ToList();
+            foreach (var key in keys)
+            {
+                if (!gridsId.Contains(key))
+                    map.VisitedGrids.Remove(key);
+            }
+
+            //Если грид исчез, то убираем его из списка. Например: Шатл
+            keys = map.OldNavMaps.Keys.ToList();
+            foreach (var key in keys)
+            {
+                if (!gridsId.Contains(key))
+                    map.OldNavMaps.Remove(key);
+            }
+
             UpdateUserInterface(uid, map);
         }
     }
 
-    public List<(NavMapComponent, Vector2i, int)> Get(EntityUid uid)
+    /// <summary>
+    ///    Получаем все NavMap;
+    ///    <return>Возвращает (NavMap, погрешность, айди грида) </return>
+    /// </summary>
+    public List<(NavMapComponent, Vector2, int)> Get(List<Entity<MapGridComponent>> grids)
     {
-        List<(NavMapComponent, Vector2i, int)> navMaps = new();
-        List<Entity<MapGridComponent>>? grids = new();
-
-        var xform = Transform(uid);
-        _mapManager.FindGridsIntersecting(xform.MapID, new Box2(new Vector2i(0, 0) - 500, new Vector2i(0, 0) + 500), ref grids, approx: true, includeMap: true);
+        List<(NavMapComponent, Vector2, int)> navMaps = new();
         for (int i = 0; i < grids.Count; i++)
         {
             var a = new NavMapComponent();
             TryComp(grids[i].Owner, out a);
             if (a != null && a != new NavMapComponent())
             {
-                TransformComponent? transform = null;
-                TryComp(grids[i].Owner, out transform);
-                if (transform == null || transform.GridUid == null)
+                TransformComponent? transform = Transform(grids[i].Owner);
+                if (transform.GridUid == null)
                     continue;
 
                 var mappos = _transformSystem.ToMapCoordinates(transform.Coordinates);
-                var pogr = new Vector2i((int)Math.Round(Math.Round(mappos.X, 1), MidpointRounding.AwayFromZero), (int)Math.Round(Math.Round(mappos.Y, 1), MidpointRounding.AwayFromZero));
+                var pogr = new Vector2(mappos.X, mappos.Y);
+                foreach (var chunk in a.Chunks)
+                {
+                    for (int x = 0; x < 64; x++)
+                    {
+                        if (chunk.Value.TileData[x] != 0)
+                        {
+                            var gsdgssgd = 0;
+                        }
+                    }
+                }
                 navMaps.Add((a, pogr, transform.GridUid.Value.Id));
             }
         }
@@ -254,7 +259,7 @@ public sealed class LavalandMapConsoleSystem : EntitySystem
         // The grid must have a NavMapComponent to visualize the map in the UI
         var xform = Transform(uid);
 
-        if (xform == null)
+        if (xform == null || xform.MapUid == null)
             return;
         if (xform.GridUid != null)
             EnsureComp<NavMapComponent>(xform.GridUid.Value);

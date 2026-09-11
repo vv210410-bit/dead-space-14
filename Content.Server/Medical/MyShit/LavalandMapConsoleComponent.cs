@@ -7,10 +7,14 @@ namespace Content.Server.Medical.MyShit;
 [Access(typeof(LavalandMapConsoleSystem))]
 public sealed partial class LavalandMapConsoleComponent : Component
 {
-    // /// <summary>
-    // ///     List of all currently connected sensors to this console.
-    // /// </summary>
+    /// <summary>
+    /// Тут хранится Айди грида => Чанки грида. 
+    /// Он хранит старые версии чанков, поэтому и назван  Old
+    /// </summary>
     public Dictionary<int, OldNavMap> OldNavMaps = new();
-
+    /// <summary>
+    ///     Содержит информацию о посещенных гридах.
+    ///     Айди грида => (Центр грида, имя)
+    /// </summary>
     public Dictionary<int, (Vector2, string)> VisitedGrids = new();
 }

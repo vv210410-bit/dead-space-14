@@ -5,7 +5,7 @@ using Robust.Shared.Timing;
 
 namespace Content.Client.Medical.MapLavaland;
 
-public sealed partial class MapLavalandNavMapControl : NavMapControl
+public sealed partial class MapLavalandNavMapControl : LavaNavMapControl
 {
     public NetEntity? Focus;
     public Dictionary<NetEntity, string> LocalizedNames = new();

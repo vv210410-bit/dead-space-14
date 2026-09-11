@@ -699,36 +699,8 @@ public abstract partial class SharedMindSystem : EntitySystem
 
         EnsureComp<ExaminerComponent>(uid);
     }
-
-
-public void MakeSentient1(EntityUid uid, bool allowMovement = true, bool allowSpeech = true)
-{
-    EnsureComp<PhysicsComponent>(uid, out var physics);
-    DirtyEntity(uid);
 }
 
-public void MakeSentient2(EntityUid uid, bool allowMovement = true, bool allowSpeech = true)
-{
-    EnsureComp<PhysicsComponent>(uid, out var physics);
-    _physics.SetBodyType(uid, BodyType.Dynamic);
-    Dirty(uid, physics);
-}
-
-public void MakeSentient3(EntityUid uid, bool allowMovement = true, bool allowSpeech = true)
-{
-    EnsureComp<PhysicsComponent>(uid, out var physics);
-    _physics.SetBodyType(uid, BodyType.KinematicController);
-    Dirty(uid, physics);
-}
-
-public void MakeSentient4(EntityUid uid, bool allowMovement = true, bool allowSpeech = true)
-{
-    EnsureComp<PhysicsComponent>(uid, out var physics);
-    _physics.SetBodyType(uid, BodyType.Static);
-    Dirty(uid, physics);
-}
-
-}
 /// <summary>
 /// Raised on an entity to determine whether or not they are "dead" in IC-logic.
 /// If not handled, then it will simply check if they are dead physically.

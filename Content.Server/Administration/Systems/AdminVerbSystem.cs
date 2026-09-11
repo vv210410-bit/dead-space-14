@@ -539,40 +539,10 @@ namespace Content.Server.Administration.Systems
                     Text = Loc.GetString("make-sentient-verb-get-data-text"),
                     Category = VerbCategory.Debug,
                     Icon = new SpriteSpecifier.Texture(new ("/Textures/Interface/VerbIcons/sentient.svg.192dpi.png")),
-                    Act = () => _mindSystem.MakeSentient1(args.Target),
+                    Act = () => _mindSystem.MakeSentient(args.Target),
                     Impact = LogImpact.Medium
                 };
                 args.Verbs.Add(verb);
-
-                Verb verb1 = new()
-                {
-                    Text = Loc.GetString("make-sentient-verb-get-data-text2"),
-                    Category = VerbCategory.Debug,
-                    Icon = new SpriteSpecifier.Texture(new ("/Textures/Interface/VerbIcons/sentient.svg.192dpi.png")),
-                    Act = () => _mindSystem.MakeSentient2(args.Target),
-                    Impact = LogImpact.Medium
-                };
-                args.Verbs.Add(verb1);
-
-                Verb verb2 = new()
-                {
-                    Text = Loc.GetString("make-sentient-verb-get-data-text3"),
-                    Category = VerbCategory.Debug,
-                    Icon = new SpriteSpecifier.Texture(new ("/Textures/Interface/VerbIcons/sentient.svg.192dpi.png")),
-                    Act = () => _mindSystem.MakeSentient3(args.Target),
-                    Impact = LogImpact.Medium
-                };
-                args.Verbs.Add(verb2);
-
-                Verb verb3 = new()
-                {
-                    Text = Loc.GetString("make-sentient-verb-get-data-text4"),
-                    Category = VerbCategory.Debug,
-                    Icon = new SpriteSpecifier.Texture(new ("/Textures/Interface/VerbIcons/sentient.svg.192dpi.png")),
-                    Act = () => _mindSystem.MakeSentient4(args.Target),
-                    Impact = LogImpact.Medium
-                };
-                args.Verbs.Add(verb3);
             }
 
             if (TryComp<InventoryComponent>(args.Target, out var inventoryComponent))

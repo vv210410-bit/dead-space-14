@@ -22,6 +22,7 @@ using Robust.Shared.Utility;
 using Content.Shared.Medical.MapLavaland;
 
 using static Robust.Client.UserInterface.Controls.BoxContainer;
+using Robust.Shared.Physics;
 
 namespace Content.Client.Medical.MapLavaland;
 
@@ -29,14 +30,9 @@ namespace Content.Client.Medical.MapLavaland;
 public sealed partial class MapLavaLandWindow : FancyWindow
 {
     [Dependency] private readonly IEntityManager _entManager = default!;
-    [Dependency] private readonly IPlayerManager _player = default!; // DS14
-    [Dependency] private readonly IPrototypeManager _prototypeManager = default!;
     private readonly SharedTransformSystem _transformSystem;
-    private readonly StationAiTrackEntitySystem _stationAiTrack; // DS14
-    private readonly SpriteSystem _spriteSystem;
 
-    private NetEntity? _trackedEntity;
-    private bool _tryToScrollToListFocus;
+    private readonly SpriteSystem _spriteSystem;
     private Texture? _blipTexture;
 
     public MapLavaLandWindow()
@@ -45,10 +41,8 @@ public sealed partial class MapLavaLandWindow : FancyWindow
         IoCManager.InjectDependencies(this);
 
         _transformSystem = _entManager.System<SharedTransformSystem>();
-        _stationAiTrack = _entManager.System<StationAiTrackEntitySystem>(); // DS14
         _spriteSystem = _entManager.System<SpriteSystem>();
-
-        NavMap.TrackedEntitySelectedAction += SetTrackedEntityFromNavMap;
+        // NavMap.TrackedEntitySelectedAction += SetTrackedEntityFromNavMap;
     }
 
     public void Set(string stationName, EntityUid? mapUid)
@@ -70,109 +64,34 @@ public sealed partial class MapLavaLandWindow : FancyWindow
     protected override void FrameUpdate(FrameEventArgs args)
     {
         base.FrameUpdate(args);
-        if (_tryToScrollToListFocus)
-            TryToScrollToFocus();
     }
 
     public void SetChunks(MapLavaLandState state, EntityUid owner)
     {
-        if (_entManager.TryGetComponent<TransformComponent>(owner, out var xform))
-        {
-            NavMap.Mappos = _transformSystem.ToMapCoordinates(xform.Coordinates).Position;
-            if (_entManager.TryGetComponent<TransformComponent>(xform.GridUid, out var xformForBlip))
-            {
-                NavMap.XformForBlip = xformForBlip;
-            }
-            if (_blipTexture != null)
-            {
-                NavMap.TrackedEntities[_entManager.GetNetEntity(owner)] = new NavMapBlip(xform.Coordinates, _blipTexture, Color.Cyan, true, false);
-            }
-        }
         NavMap.VisitedGrids = state.VisitedGrids;
         NavMap.OldNavMap = state.OldNavMap;
+        if (_blipTexture != null && _entManager.TryGetComponent<TransformComponent>(owner, out var xform))
+        {
+            NavMap.TrackedEntities[_entManager.GetNetEntity(owner)] = new NavMapBlip(xform.Coordinates, _blipTexture, Color.Cyan, true, false);
+        }
+
         NavMap.ForceNavMapUpdate();
     }
 
-    private void SetTrackedEntityFromNavMap(NetEntity? netEntity)
-    {
-        var prevTrackedEntity = _trackedEntity;
-        _trackedEntity = netEntity;
+    // private void SetTrackedEntityFromNavMap(NetEntity? netEntity)
+    // {
+    //     var prevTrackedEntity = _trackedEntity;
+    //     _trackedEntity = netEntity;
 
-        if (_trackedEntity == prevTrackedEntity)
-            prevTrackedEntity = null;
+    //     if (_trackedEntity == prevTrackedEntity)
+    //         prevTrackedEntity = null;
 
-        NavMap.Focus = _trackedEntity;
-        _tryToScrollToListFocus = true;
+    //     NavMap.Focus = _trackedEntity;
+    //     _tryToScrollToListFocus = true;
 
-        UpdateSensorsTable(_trackedEntity, prevTrackedEntity);
-    }
+    //     UpdateSensorsTable(_trackedEntity, prevTrackedEntity);
+    // }
 
-    private void UpdateSensorsTable(NetEntity? currTrackedEntity, NetEntity? prevTrackedEntity)
-    {
-        foreach (var sensor in SensorsTable.Children)
-        {
-            if (sensor is not CrewMonitoringButton)
-                continue;
-
-            var castSensor = (CrewMonitoringButton) sensor;
-
-            if (castSensor.SuitSensorUid == prevTrackedEntity)
-                castSensor.RemoveStyleClass(StyleClass.Positive);
-
-            else if (castSensor.SuitSensorUid == currTrackedEntity)
-                castSensor.AddStyleClass(StyleClass.Positive);
-
-            if (castSensor?.Coordinates == null)
-                continue;
-
-            if (NavMap.TrackedEntities.TryGetValue(castSensor.SuitSensorUid, out var data))
-            {
-                data = new NavMapBlip
-                    (CoordinatesToLocal(data.Coordinates),
-                    data.Texture,
-                    (currTrackedEntity == null || castSensor.SuitSensorUid == currTrackedEntity) ? Color.LimeGreen : Color.LimeGreen * Color.DimGray,
-                    castSensor.SuitSensorUid == currTrackedEntity);
-
-                NavMap.TrackedEntities[castSensor.SuitSensorUid] = data;
-            }
-        }
-    }
-
-    private void TryToScrollToFocus()
-    {
-        if (!_tryToScrollToListFocus)
-            return;
-
-        if (TryGetNextScrollPosition(out float? nextScrollPosition))
-        {
-            SensorScroller.VScrollTarget = nextScrollPosition.Value;
-
-            if (MathHelper.CloseToPercent(SensorScroller.VScroll, SensorScroller.VScrollTarget))
-            {
-                _tryToScrollToListFocus = false;
-                return;
-            }
-        }
-    }
-
-    private bool TryGetNextScrollPosition([NotNullWhen(true)] out float? nextScrollPosition)
-    {
-        nextScrollPosition = 0;
-
-        foreach (var sensor in SensorsTable.Children)
-        {
-            if (sensor is CrewMonitoringButton &&
-                ((CrewMonitoringButton) sensor).SuitSensorUid == _trackedEntity)
-                return true;
-
-            nextScrollPosition += sensor.Height;
-        }
-
-        // Failed to find control
-        nextScrollPosition = null;
-
-        return false;
-    }
 
     /// <summary>
     /// Converts the input coordinates to an EntityCoordinates which are in
