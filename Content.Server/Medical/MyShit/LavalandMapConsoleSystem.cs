@@ -129,9 +129,8 @@ public sealed class LavalandMapConsoleSystem : EntitySystem
             //Записываем информацию о ближайших чанках в компонент. 
             foreach (var (navmap, pogr, gridId) in navMaps)
             {
-                //переводем позицию игрока в чанк.
-                var posToChunk = new Vector2i((int)Math.Floor((mapPos.X + pogr.X) / 8), (int)Math.Floor((mapPos.Y + pogr.Y) / 8));
-                posToChunk = new Vector2i(0,0);
+                //переводем позицию игрока в чанк c учетеом погрешностим. Работает иногда багано, но основную задачу выполняет.
+                var posToChunk = new Vector2i((int)Math.Floor((mapPos.X - pogr.X) / 8), (int)Math.Floor((mapPos.Y - pogr.Y) / 8));
 
                 if (!map.OldNavMaps.ContainsKey(gridId))
                 {
@@ -139,9 +138,16 @@ public sealed class LavalandMapConsoleSystem : EntitySystem
                 }
                 map.OldNavMaps[gridId].Pogr = pogr;
 
-                foreach (var chunk in navmap.Chunks)
+                for (int y = -2; y <= 2; y++)
                 {
-                    map.OldNavMaps[gridId].AddChunk(chunk.Value);
+                    for (int x = -2; x <= 2; x++)
+                    {
+                        var chunkOrigin = new Vector2i(posToChunk.X + x, posToChunk.Y + y);
+                        if (navmap.Chunks.ContainsKey(chunkOrigin))
+                        {
+                            map.OldNavMaps[gridId].AddChunk(navmap.Chunks[chunkOrigin]);
+                        }
+                    }
                 }
             }
 
@@ -203,16 +209,6 @@ public sealed class LavalandMapConsoleSystem : EntitySystem
 
                 var mappos = _transformSystem.ToMapCoordinates(transform.Coordinates);
                 var pogr = new Vector2(mappos.X, mappos.Y);
-                foreach (var chunk in a.Chunks)
-                {
-                    for (int x = 0; x < 64; x++)
-                    {
-                        if (chunk.Value.TileData[x] != 0)
-                        {
-                            var gsdgssgd = 0;
-                        }
-                    }
-                }
                 navMaps.Add((a, pogr, transform.GridUid.Value.Id));
             }
         }

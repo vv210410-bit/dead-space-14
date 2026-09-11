@@ -70,9 +70,11 @@ public sealed partial class MapLavaLandWindow : FancyWindow
     {
         NavMap.VisitedGrids = state.VisitedGrids;
         NavMap.OldNavMap = state.OldNavMap;
-        if (_blipTexture != null && _entManager.TryGetComponent<TransformComponent>(owner, out var xform))
+        if (_entManager.TryGetComponent<TransformComponent>(owner, out var xform))
         {
-            NavMap.TrackedEntities[_entManager.GetNetEntity(owner)] = new NavMapBlip(xform.Coordinates, _blipTexture, Color.Cyan, true, false);
+            NavMap.Mappos = _transformSystem.ToMapCoordinates(xform.Coordinates).Position;
+            if (_blipTexture != null)
+                NavMap.TrackedEntities[_entManager.GetNetEntity(owner)] = new NavMapBlip(xform.Coordinates, _blipTexture, Color.Cyan, true, false);
         }
 
         NavMap.ForceNavMapUpdate();

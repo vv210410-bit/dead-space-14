@@ -577,6 +577,7 @@ public partial class LavaNavMapControl : MapGridControl
 
         foreach (var oldNavMap in OldNavMap.Values)
         {
+            //переводем позицию игрока в чанк c учетеом погрешностим. Работает иногда багано, но основную задачу выполняет.
             var posToChunk = new Vector2i((int)Math.Floor((Mappos.X - oldNavMap.Pogr.X) / 8), (int)Math.Floor((Mappos.Y - oldNavMap.Pogr.Y) / 8));
 
             foreach (var (chunkOrigin, chunk) in oldNavMap.Chunks)
@@ -706,10 +707,10 @@ public partial class LavaNavMapControl : MapGridControl
         var chunkcenter = new Vector2(chunk.Origin.X * 8 + pogr.X + 4, chunk.Origin.Y * 8 + pogr.Y + 4);
         var verts = new Vector2[4];
 
-        verts[0] = new Vector2(MathF.Round(chunkcenter.X - 4), MathF.Round(chunkcenter.Y + 4));
-        verts[1] = new Vector2(MathF.Round(chunkcenter.X + 4), MathF.Round(chunkcenter.Y + 4));
-        verts[2] = new Vector2(MathF.Round(chunkcenter.X + 4), MathF.Round(chunkcenter.Y - 4));
-        verts[3] = new Vector2(MathF.Round(chunkcenter.X - 4), MathF.Round(chunkcenter.Y - 4));
+        verts[0] = new Vector2(chunkcenter.X - 4, chunkcenter.Y + 4);
+        verts[1] = new Vector2(chunkcenter.X + 4, chunkcenter.Y + 4);
+        verts[2] = new Vector2(chunkcenter.X + 4, chunkcenter.Y - 4);
+        verts[3] = new Vector2(chunkcenter.X - 4, chunkcenter.Y - 4);
 
         TilePolygonsForChunks.Add((verts, TileColor));
     }

@@ -23,7 +23,7 @@ public class OldNavMap()
     public void AddChunk(NavMapChunk chunk)
     {
         var oldChunk = new NavMapChunk(chunk.Origin);
-        oldChunk.TileData.CopyTo(chunk.TileData);
+        chunk.TileData.CopyTo(oldChunk.TileData);
         oldChunk.LastUpdate = chunk.LastUpdate;
         if (Chunks.ContainsKey(chunk.Origin))
         {

@@ -103,9 +103,7 @@ public sealed partial class CrewMonitoringWindow : FancyWindow
         _blipTexture = _spriteSystem.Frame0(new SpriteSpecifier.Texture(new ResPath("/Textures/Interface/NavMap/beveled_circle.png")));
 
         if (_entManager.TryGetComponent<TransformComponent>(mapUid, out var xform))
-        {
             NavMap.MapUid = xform.GridUid;
-        }
         else
             NavMap.Visible = false;
 
@@ -117,7 +115,7 @@ public sealed partial class CrewMonitoringWindow : FancyWindow
     protected override void FrameUpdate(FrameEventArgs args)
     {
         base.FrameUpdate(args);
-        NavMap.ForceNavMapUpdate();
+
         if (_tryToScrollToListFocus)
             TryToScrollToFocus();
     }
@@ -127,11 +125,11 @@ public sealed partial class CrewMonitoringWindow : FancyWindow
         ClearOutDatedData();
 
         // No server label
-        // if (sensors.Count == 0)
-        // {
-        //     NoServerLabel.Visible = true;
-        //     return;
-        // }
+        if (sensors.Count == 0)
+        {
+            NoServerLabel.Visible = true;
+            return;
+        }
 
         NoServerLabel.Visible = false;
 
