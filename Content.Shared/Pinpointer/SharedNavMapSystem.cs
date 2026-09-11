@@ -2,7 +2,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using Content.Shared.Examine;
-using Content.Shared.StepTrigger.Components;
 using Content.Shared.Tag;
 using Content.Shared.Wall;
 using Robust.Shared.GameStates;
@@ -31,6 +30,7 @@ public abstract class SharedNavMapSystem : EntitySystem
     private static readonly ProtoId<TagPrototype>[] WallTags = {"Window"};
     private EntityQuery<NavMapDoorComponent> _doorQuery;
     private EntityQuery<WallComponent> _wallQuery; // DS14: injected EntityQuery fields are unavailable on the current engine baseline.
+
     public override void Initialize()
     {
         base.Initialize();

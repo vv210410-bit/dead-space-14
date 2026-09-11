@@ -104,6 +104,7 @@ public sealed partial class CrewMonitoringWindow : FancyWindow
 
         if (_entManager.TryGetComponent<TransformComponent>(mapUid, out var xform))
             NavMap.MapUid = xform.GridUid;
+
         else
             NavMap.Visible = false;
 
