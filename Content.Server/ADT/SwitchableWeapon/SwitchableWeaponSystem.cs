@@ -8,6 +8,8 @@ using Content.Shared.ADT.SwitchableWeapon;
 using Content.Shared.Toggleable;
 using Content.Shared.Weapons.Melee.Events;
 using Robust.Shared.Audio.Systems;
+using Robust.Shared.Prototypes;
+using System.Linq;
 
 namespace Content.Server.ADT.SwitchableWeapon;
 
@@ -16,6 +18,8 @@ public sealed class SwitchableWeaponSystem : EntitySystem
     [Dependency] private readonly SharedItemSystem _item = default!;
     [Dependency] private readonly SharedAppearanceSystem _appearance = default!;
     [Dependency] private readonly SharedAudioSystem _audio = default!;
+
+    [Dependency] private readonly IPrototypeManager _proto = default!;
 
     public override void Initialize()
     {

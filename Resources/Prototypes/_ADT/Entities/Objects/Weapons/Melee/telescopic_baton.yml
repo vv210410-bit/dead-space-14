@@ -52,3 +52,141 @@
     sound:
       path: /Audio/_DeadSpace/Items/Handing/batton/telescopic_baton_drop.ogg
   #DS14-End
+
+- type: entity
+  parent: Spear
+  id: ADTtelescopicBaton2
+  name: телескопическая копье
+  description: Не очень большая и не очень опасная, выдвижная дубинка. Может храниться в карманах в сложенном состоянии.
+  components:
+  - type: Sprite
+    sprite: _ADT/Objects/Weapons/Melee/telescopic_baton.rsi
+    layers:
+    - state: telescope_off
+      map: [ "enum.ToggleableVisuals.Layer" ]
+  - type: SwitchableWeapon
+    openSound: "/Audio/_ADT/open_telescopic_baton.ogg"
+    closeSound: "/Audio/_ADT/close_telescopic_baton.ogg"
+  - type: StaminaDamageOnHit
+    damage: 0
+  - type: MeleeWeapon
+    damage:
+      types:
+        Blunt: 3
+    wideAnimationRotation: -135
+  - type: Item
+    size: Small
+    sprite: _ADT/Objects/Weapons/Melee/telescopic_baton.rsi
+  - type: UseDelay
+    delay: 1
+  - type: DisarmMalus
+    malus: 0
+  - type: Appearance
+  - type: GenericVisualizer
+    visuals:
+     enum.ToggleableVisuals.Enabled:
+        enum.ToggleableVisuals.Layer:
+          True: {state: telescope_on}
+          False: {state: telescope_off}
+  #DS14-Start
+  - type: EmitSoundOnPickup
+    sound:
+      path: /Audio/_DeadSpace/Items/Handing/batton/telescopic_baton_pickup.ogg
+  - type: EmitSoundOnDrop
+    sound:
+      path: /Audio/_DeadSpace/Items/Handing/batton/telescopic_baton_drop.ogg
+  - type: EmitSoundOnLand
+    sound:
+      path: /Audio/_DeadSpace/Items/Handing/batton/telescopic_baton_drop.ogg
+  #DS14-End
+
+- type: entity
+  name: spear
+  parent: [BaseItem, BaseMinorContraband]
+  id: Spear2
+  description: Definition of a Classic. Keeping murder affordable since 200,000 BCE.
+  components:
+  - type: EmbeddableProjectile
+    offset: -0.15,0.0
+  - type: ThrowingAngle
+    angle: 225
+  - type: LandAtCursor
+  - type: Tag
+    tags:
+    - Spear
+    - ScurretWearable
+  - type: Sharp
+  - type: Sprite
+    sprite: Objects/Weapons/Melee/spear.rsi
+    layers:
+    - state: spear
+  - type: MeleeWeapon
+    wideAnimationRotation: -135
+    damage:
+      types:
+        Piercing: 20
+    angle: 0
+    animation: WeaponArcThrust
+    soundHit:
+      path: /Audio/Weapons/bladeslice.ogg
+  - type: DamageOtherOnHit
+    damage:
+      types:
+        Piercing: 25
+  - type: Item
+    size: Ginormous
+  - type: Clothing
+    quickEquip: false
+    slots:
+    - back
+    - suitStorage
+  - type: Construction
+    graph: Spear
+    node: spear
+  - type: Wieldable
+  - type: IncreaseDamageOnWield
+    damage:
+      types:
+        Piercing: 4
+  - type: Damageable
+    damageContainer: Inorganic
+  - type: Destructible
+    thresholds:
+    - trigger:
+        !type:DamageTrigger
+        damage: 1 #excess damage avoids cost of spawning entities.
+      behaviors:
+      - !type:DoActsBehavior
+        acts: [ "Destruction" ]
+    - trigger:
+        !type:DamageTrigger
+        damage: 1
+      behaviors:
+      - !type:PlaySoundBehavior
+        sound:
+          collection: GlassBreak
+          params:
+            volume: -4
+      - !type:SpawnEntitiesBehavior
+        spawn:
+          PartRodMetal1:
+            min: 1
+            max: 1
+      - !type:DoActsBehavior
+        acts: [ "Destruction" ]
+  - type: DamageOnLand
+    damage:
+      types:
+        Blunt: 5
+  - type: UseDelay
+  #DS14-Start
+  - type: EmitSoundOnPickup
+    sound:
+      path: /Audio/_DeadSpace/Items/Handing/knife/knife_pickup.ogg
+  - type: EmitSoundOnDrop
+    sound:
+      path: /Audio/_DeadSpace/Items/Handing/knife/knife_drop.ogg
+  - type: EmitSoundOnLand
+    sound:
+      path: /Audio/_DeadSpace/Items/Handing/knife/knife_drop.ogg
+  #DS14-End
