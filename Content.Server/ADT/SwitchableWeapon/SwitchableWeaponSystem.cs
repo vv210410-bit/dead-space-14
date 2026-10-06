@@ -10,6 +10,12 @@ using Content.Shared.Weapons.Melee.Events;
 using Robust.Shared.Audio.Systems;
 using Robust.Shared.Prototypes;
 using System.Linq;
+using Content.Shared.Projectiles;
+using Content.Shared.Throwing;
+using Content.Shared.Tag;
+using Content.Shared.Kitchen.Components;
+using Content.Shared.Weapons.Melee;
+using Content.Shared.Damage;
 
 namespace Content.Server.ADT.SwitchableWeapon;
 
@@ -88,6 +94,27 @@ public sealed class SwitchableWeaponSystem : EntitySystem
         if (TryComp<StaminaDamageOnHitComponent>(uid, out var stamComp))
         {
             stamComp.Damage = comp.IsOpen ? comp.StaminaDamageOpen : comp.StaminaDamageFolded;
+        }
+
+        if (comp.IsOpen)
+        {
+            var newcomp = EnsureComp<EmbeddableProjectileComponent>(uid);
+            newcomp.Offset = new System.Numerics.Vector2(-0.15f, 0.0f);
+            var newcomp1 = EnsureComp<ThrowingAngleComponent>(uid);
+            newcomp1.Angle = 225;
+            var newcomp2 = EnsureComp<LandAtCursorComponent>(uid);
+            var newcomp3 = EnsureComp<SharpComponent>(uid);
+            var newcomp4 = EnsureComp<MeleeWeaponComponent>(uid);
+            newcomp4.WideAnimationRotation = -135;
+            newcomp4.Angle = 0;
+            newcomp4.Animation = "WeaponArcThrust";
+            var newcomp5 = EnsureComp<DamageOtherOnHitComponent>(uid);
+            newcomp5.Damage = comp.DamageOpen;
+
+        }
+        else
+        {
+            
         }
     }
 
