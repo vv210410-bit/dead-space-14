@@ -69,6 +69,11 @@ public sealed class PhotocopierPrintMessage : BoundUserInterfaceMessage
 }
 
 [Serializable, NetSerializable]
+public sealed class PhotocopierDeleteMessage : BoundUserInterfaceMessage
+{
+}
+
+[Serializable, NetSerializable]
 public sealed class PhotocopierCopyModeMessage : BoundUserInterfaceMessage
 {
 }

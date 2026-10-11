@@ -28,6 +28,7 @@ public sealed class PhotocopierBoundUi : BoundUserInterface
         _window.PrintButtonPressed += OnPrintButtonPressed;
         _window.CopyModeButtonPressed += OnCopyModeButtonPressed;
         _window.PrintModeButtonPressed += OnPrintModeButtonPressed;
+        _window.DeleteButtonPressed += OnDeleteButtonPressed;
     }
 
     private void OnFormButtonPressed(ProtoId<PaperworkFormPrototype> formPrototype)
@@ -38,6 +39,11 @@ public sealed class PhotocopierBoundUi : BoundUserInterface
     private void OnPrintButtonPressed(int amount, PhotocopierMode mode)
     {
         SendMessage(new PhotocopierPrintMessage(amount, mode));
+    }
+
+    private void OnDeleteButtonPressed()
+    {
+        SendMessage(new PhotocopierDeleteMessage());
     }
 
     private void OnCopyModeButtonPressed()

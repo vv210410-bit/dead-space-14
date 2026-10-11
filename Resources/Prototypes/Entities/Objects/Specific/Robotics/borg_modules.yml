@@ -824,6 +824,7 @@
         whitelist:
           tags:
           - GasTankBorg
+          - GasTank
 #DS14-End
   - type: BorgModuleIcon
     icon: { sprite: Interface/Actions/actions_borg.rsi, state: construction-module }

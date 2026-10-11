@@ -20,6 +20,7 @@ public sealed partial class PhotocopierWindow : FancyWindow
     public event Action<int, PhotocopierMode>? PrintButtonPressed;
     public event Action? CopyModeButtonPressed;
     public event Action? PrintModeButtonPressed;
+    public event Action? DeleteButtonPressed;
 
     private readonly List<PhotocopierFormCategory> _categories = [];
 
@@ -46,6 +47,8 @@ public sealed partial class PhotocopierWindow : FancyWindow
 
         PrintButton.OnPressed += _ => PrintButtonPressed?.Invoke(Amount.Value, _mode);
         PrintButton.OnPressed += _ => PrintButton.Disabled = true;
+        DeleteButton.OnPressed += _ => DeleteButtonPressed?.Invoke();
+        DeleteButton.OnPressed += _ => DeleteButton.Disabled = true;
         CopyModeButton.OnPressed += _ => CopyModeButtonPressed?.Invoke();
         PrintModeButton.OnPressed += _ => PrintModeButtonPressed?.Invoke();
 
@@ -66,7 +69,7 @@ public sealed partial class PhotocopierWindow : FancyWindow
 
         TonerAmount.MaxValue = _maxTonerAmount;
         TonerAmount.Value = _tonerLeft;
-
+        DeleteButton.Disabled = !state.IsPaperInserted;
         if (state.Mode == PhotocopierMode.Copy)
         {
             CopyModeButton.Pressed = true;

@@ -80,11 +80,17 @@ public sealed partial class PhotocopierComponent : Component
     [DataField]
     public float PrintingTimeRemaining;
 
+    [DataField]
+    public float DeletingTimeRemaining;
+
     /// <summary>
     /// How long the printing animation will play
     /// </summary>
     [ViewVariables]
     public float PrintingTime = 2.3f;
+
+    [ViewVariables]
+    public float DeletingTime = 2.3f;
 
     [ViewVariables]
     public PhotocopierMode Mode = PhotocopierMode.Copy;

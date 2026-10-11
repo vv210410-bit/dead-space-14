@@ -21,6 +21,7 @@ using Content.Shared.UserInterface;
 using Content.Shared.Power;
 using Content.Server.Hands.Systems;
 using Robust.Shared.Prototypes;
+using Content.Server.Construction.Completions;
 
 namespace Content.Server.DeadSpace.Photocopier;
 
@@ -64,6 +65,7 @@ public sealed class PhotocopierSystem : EntitySystem
         SubscribeLocalEvent<PhotocopierComponent, PhotocopierCopyModeMessage>(OnCopyModeButtonPressed);
         SubscribeLocalEvent<PhotocopierComponent, PhotocopierPrintModeMessage>(OnPrintModeButtonPressed);
         SubscribeLocalEvent<PhotocopierComponent, PhotocopierPrintMessage>(OnPrintButtonPressed);
+        SubscribeLocalEvent<PhotocopierComponent, PhotocopierDeleteMessage>(OnDeleteButtonPressed);
     }
 
     public override void Update(float frameTime)
@@ -77,11 +79,29 @@ public sealed class PhotocopierSystem : EntitySystem
                 continue;
 
             ProcessPrintingAnimation(uid, frameTime, fax);
+            ProcessDeletingAnimation(uid, frameTime, fax);
             ProcessScanningAnimation(uid, frameTime, fax);
             ProcessUseTimeout(uid, frameTime, fax);
         }
     }
+    private void ProcessDeletingAnimation(EntityUid uid, float frameTime, PhotocopierComponent comp)
+    {
+        if (comp.DeletingTimeRemaining > 0)
+        {
+            comp.DeletingTimeRemaining -= frameTime;
+            UpdateAppearance(uid, comp);
 
+            var isAnimationEnd = comp.DeletingTimeRemaining <= 0;
+            if (isAnimationEnd)
+            {
+                DeletePaper(uid, comp);
+                UpdateUserInterface(uid, comp);
+                _itemSlotsSystem.SetLock(uid, comp.PaperSlot, false);
+            }
+
+            return;
+        }
+    }
     private void ProcessPrintingAnimation(EntityUid uid, float frameTime, PhotocopierComponent comp)
     {
         if (comp.ScanningTimeRemaining > 0)
@@ -261,6 +281,21 @@ public sealed class PhotocopierSystem : EntitySystem
         UpdateUserInterface(uid, component);
     }
 
+    private void OnDeleteButtonPressed(EntityUid uid, PhotocopierComponent component, PhotocopierDeleteMessage args)
+    {
+        if (component.PaperSlot != null)
+        {
+            var isPaperInserted = component.PaperSlot.Item.HasValue;
+            if (isPaperInserted)
+            {
+                _audioSystem.PlayPvs(component.PrintSound, uid, AudioParams.Default.WithVolume(-4f));
+                component.DeletingTimeRemaining = component.DeletingTime;
+                _itemSlotsSystem.SetLock(uid, component.PaperSlot, true);
+            }
+        }
+        UpdateUserInterface(uid, component);
+    }
+
     private void OnPrintButtonPressed(EntityUid uid, PhotocopierComponent component, PhotocopierPrintMessage args)
     {
         if (args.Amount > component.TonerLeft)
@@ -302,7 +337,7 @@ public sealed class PhotocopierSystem : EntitySystem
 
         if (component.ScanningTimeRemaining > 0)
             _appearanceSystem.SetData(uid, PhotocopierVisuals.VisualState, PhotocopierVisualState.Scanning);
-        else if (component.PrintingTimeRemaining > 0)
+        else if (component.PrintingTimeRemaining > 0 || component.DeletingTimeRemaining > 0)
             _appearanceSystem.SetData(uid, PhotocopierVisuals.VisualState, PhotocopierVisualState.Printing);
         else
             _appearanceSystem.SetData(uid, PhotocopierVisuals.VisualState, PhotocopierVisualState.Normal);
@@ -365,6 +400,21 @@ public sealed class PhotocopierSystem : EntitySystem
             component.PrintingQueue.Enqueue(printout);
             component.UseTimeoutRemaining += component.UseTimeout;
         }
+    }
+
+    private void DeletePaper(EntityUid uid, PhotocopierComponent? component = null)
+    {
+        if (!Resolve(uid, ref component) || component.PrintingQueue.Count != 0)
+            return;
+
+        var entity = component.PaperSlot.Item;
+        if (entity == null)
+            return;
+
+        Del(entity.Value);
+        DirtyEntity(entity.Value);
+
+        var printed = Spawn("PaperScrap", Transform(uid).Coordinates);
     }
 
     private void SpawnPaperFromQueue(EntityUid uid, PhotocopierComponent? component = null)

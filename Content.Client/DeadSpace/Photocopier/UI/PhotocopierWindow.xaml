@@ -42,9 +42,9 @@
                             <Button Name="CopyModeButton" Text="{Loc 'photocopier-ui-mode-copy-button'}" HorizontalExpand="True" StyleClasses="OpenRight" />
                             <Button Name="PrintModeButton" Text="{Loc 'photocopier-ui-mode-print-button'}" HorizontalExpand="True" StyleClasses="OpenLeft" />
                         </BoxContainer>
-                        <Control MinSize="0 4" />
                         <BoxContainer Orientation="Horizontal" HorizontalExpand="True">
-                            <Button Name="PrintButton" Text="{Loc 'photocopier-ui-print-button'}" HorizontalExpand="True" />
+                            <Button Name="DeleteButton" Text="{Loc 'уничтожить'}" HorizontalExpand="True" HorizontalAlignment="Left" StyleClasses="OpenRight" />
+                            <Button Name="PrintButton" Text="{Loc 'photocopier-ui-print-button'}" HorizontalExpand="True" StyleClasses="OpenLeft"/> 
                         </BoxContainer>
                     </BoxContainer>
 
