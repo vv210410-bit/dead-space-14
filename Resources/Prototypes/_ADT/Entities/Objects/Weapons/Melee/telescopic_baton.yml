@@ -9,17 +9,6 @@
     layers:
     - state: telescope_off
       map: [ "enum.ToggleableVisuals.Layer" ]
-  - type: SwitchableWeapon
-    openSound: "/Audio/_ADT/open_telescopic_baton.ogg"
-    closeSound: "/Audio/_ADT/close_telescopic_baton.ogg"
-    damageOpen:
-      types:
-        Blunt: 3
-    damageFolded:
-      types:
-        Blunt: 0
-    staminaDamageFolded: 0
-    staminaDamageOpen: 30
   - type: StaminaDamageOnHit
     damage: 0
   - type: MeleeWeapon
@@ -54,7 +43,7 @@
   #DS14-End
 
 - type: entity
-  parent: Spear
+  parent: BaseItem
   id: ADTtelescopicBaton2
   name: телескопическая копье
   description: Не очень большая и не очень опасная, выдвижная дубинка. Может храниться в карманах в сложенном состоянии.
@@ -67,13 +56,16 @@
   - type: SwitchableWeapon
     openSound: "/Audio/_ADT/open_telescopic_baton.ogg"
     closeSound: "/Audio/_ADT/close_telescopic_baton.ogg"
-  - type: StaminaDamageOnHit
-    damage: 0
-  - type: MeleeWeapon
-    damage:
+    damageOpen:
       types:
         Blunt: 3
-    wideAnimationRotation: -135
+    damageFolded:
+      types:
+        Blunt: 0
+    staminaDamageFolded: 0
+    staminaDamageOpen: 30
+  - type: StaminaDamageOnHit
+    damage: 0
   - type: Item
     size: Small
     sprite: _ADT/Objects/Weapons/Melee/telescopic_baton.rsi
@@ -88,6 +80,69 @@
         enum.ToggleableVisuals.Layer:
           True: {state: telescope_on}
           False: {state: telescope_off}
+  - type: EmbeddableProjectile
+    offset: -0.15,0.0
+  - type: ThrowingAngle
+    angle: 225
+  - type: LandAtCursor
+  - type: Tag
+    tags:
+    - Spear
+    - ScurretWearable
+  - type: Sharp
+  - type: MeleeWeapon
+    wideAnimationRotation: -135
+    damage:
+      types:
+        Piercing: 20
+    angle: 0
+    animation: WeaponArcThrust
+    soundHit:
+      path: /Audio/Weapons/bladeslice.ogg
+  - type: DamageOtherOnHit
+    damage:
+      types:
+        Piercing: 25
+  - type: Clothing
+    quickEquip: false
+    slots:
+    - back
+    - suitStorage
+  - type: Wieldable
+  - type: IncreaseDamageOnWield
+    damage:
+      types:
+        Piercing: 4
+  - type: Damageable
+    damageContainer: Inorganic
+  - type: Destructible
+    thresholds:
+    - trigger:
+        !type:DamageTrigger
+        damage: 30 #excess damage avoids cost of spawning entities.
+      behaviors:
+      - !type:DoActsBehavior
+        acts: [ "Destruction" ]
+    - trigger:
+        !type:DamageTrigger
+        damage: 30
+      behaviors:
+      - !type:PlaySoundBehavior
+        sound:
+          collection: GlassBreak
+          params:
+            volume: -4
+      - !type:SpawnEntitiesBehavior
+        spawn:
+          PartRodMetal1:
+            min: 1
+            max: 1
+      - !type:DoActsBehavior
+        acts: [ "Destruction" ]
+  - type: DamageOnLand
+    damage:
+      types:
+        Blunt: 5
   #DS14-Start
   - type: EmitSoundOnPickup
     sound:
@@ -140,9 +195,6 @@
     slots:
     - back
     - suitStorage
-  - type: Construction
-    graph: Spear
-    node: spear
   - type: Wieldable
   - type: IncreaseDamageOnWield
     damage:
@@ -154,13 +206,13 @@
     thresholds:
     - trigger:
         !type:DamageTrigger
-        damage: 1 #excess damage avoids cost of spawning entities.
+        damage: 30 #excess damage avoids cost of spawning entities.
       behaviors:
       - !type:DoActsBehavior
         acts: [ "Destruction" ]
     - trigger:
         !type:DamageTrigger
-        damage: 1
+        damage: 30
       behaviors:
       - !type:PlaySoundBehavior
         sound:

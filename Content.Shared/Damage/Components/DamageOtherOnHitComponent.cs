@@ -18,7 +18,8 @@ public sealed partial class DamageOtherOnHitComponent : Component
     /// <summary>
     /// The damage amount to deal on hit.
     /// </summary>
-    [DataField(required: true)]
+    [DataField("Damage", required: true)]
+    [ViewVariables(VVAccess.ReadWrite)]
     public DamageSpecifier Damage = default!;
 
 }

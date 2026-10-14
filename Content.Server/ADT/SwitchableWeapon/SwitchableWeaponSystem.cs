@@ -16,6 +16,9 @@ using Content.Shared.Tag;
 using Content.Shared.Kitchen.Components;
 using Content.Shared.Weapons.Melee;
 using Content.Shared.Damage;
+using Content.Server.Construction.Components;
+using Content.Shared.Wieldable.Components;
+using Content.Server.Damage.Components;
 
 namespace Content.Server.ADT.SwitchableWeapon;
 
@@ -98,23 +101,36 @@ public sealed class SwitchableWeaponSystem : EntitySystem
 
         if (comp.IsOpen)
         {
-            var newcomp = EnsureComp<EmbeddableProjectileComponent>(uid);
-            newcomp.Offset = new System.Numerics.Vector2(-0.15f, 0.0f);
-            var newcomp1 = EnsureComp<ThrowingAngleComponent>(uid);
-            newcomp1.Angle = 225;
-            var newcomp2 = EnsureComp<LandAtCursorComponent>(uid);
-            var newcomp3 = EnsureComp<SharpComponent>(uid);
-            var newcomp4 = EnsureComp<MeleeWeaponComponent>(uid);
-            newcomp4.WideAnimationRotation = -135;
-            newcomp4.Angle = 0;
-            newcomp4.Animation = "WeaponArcThrust";
+            EnsureComp<WieldableComponent>(uid);
             var newcomp5 = EnsureComp<DamageOtherOnHitComponent>(uid);
-            newcomp5.Damage = comp.DamageOpen;
-
+            // if (newcomp5.Damage.DamageDict.ContainsKey("Piercing"))
+            // {
+            //     newcomp5.Damage.DamageDict["Piercing"] = 25;
+            // }
+            // else
+            // {
+            //     newcomp5.Damage.DamageDict.Add("Piercing", 25);
+            // }
+            var newcomp6 = EnsureComp<DamageOnLandComponent>(uid);
+            // newcomp5.Damage = comp.DamageOpen;
+            newcomp6.Damage = comp.DamageOpen;
         }
         else
         {
+            RemComp<WieldableComponent>(uid);
             
+            var newcomp5 = EnsureComp<DamageOtherOnHitComponent>(uid);
+            // if (newcomp5.Damage.DamageDict.ContainsKey("Piercing"))
+            // {
+            //     newcomp5.Damage.DamageDict["Piercing"] = 5;
+            // }
+            // else
+            // {
+            //     newcomp5.Damage.DamageDict.Add("Piercing", 5);
+            // }
+            var newcomp6 = EnsureComp<DamageOnLandComponent>(uid);
+            // newcomp5.Damage = comp.DamageFolded;
+            newcomp6.Damage = comp.DamageFolded;
         }
     }
 
