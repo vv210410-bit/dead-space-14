@@ -44,5 +44,8 @@ namespace Content.Shared.PDA
 
         [DataField] // DS14
         public bool SilentMode;
+
+        [DataField, ViewVariables(VVAccess.ReadWrite)]// DS14
+        public bool NewPlayer;
     }
 }

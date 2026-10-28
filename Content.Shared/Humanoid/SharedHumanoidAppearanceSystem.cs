@@ -19,6 +19,8 @@ using Robust.Shared.Prototypes;
 using Robust.Shared.Serialization.Manager;
 using Robust.Shared.Serialization.Markdown;
 using Robust.Shared.Utility;
+using Content.Shared.PDA;
+using Content.Shared.Inventory;
 using YamlDotNet.RepresentationModel;
 using Content.Shared.Corvax.TTS;
 
@@ -42,6 +44,8 @@ public abstract class SharedHumanoidAppearanceSystem : EntitySystem
     [Dependency] private readonly MarkingManager _markingManager = default!;
     [Dependency] private readonly GrammarSystem _grammarSystem = default!;
     [Dependency] private readonly IdentitySystem _identity = default!;
+
+    [Dependency] private readonly InventorySystem _inventorySystem = default!;
 
     public static readonly ProtoId<SpeciesPrototype> DefaultSpecies = "Human";
 
@@ -125,6 +129,14 @@ public abstract class SharedHumanoidAppearanceSystem : EntitySystem
         var age = GetAgeRepresentation(component.Species, component.Age);
 
         args.PushText(Loc.GetString("humanoid-appearance-component-examine", ("user", identity), ("age", age), ("species", species)));
+
+        if (_inventorySystem.TryGetSlotEntity(uid, "id", out var idUid))
+        {
+            if (TryComp(idUid, out PdaComponent? pda) && pda.NewPlayer)
+            {
+                args.PushMarkup($"[color=green]{Loc.GetString("comp-pda-examine-new-worker")}[/color]");
+            }
+        }
     }
 
     /// <summary>
